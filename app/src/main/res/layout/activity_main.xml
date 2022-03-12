@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		xmlns:tools="http://schemas.android.com/tools"
+		android:id="@+id/main_layout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@drawable/light_background"
+		tools:context=".MainActivity">
+
+	<RelativeLayout
+			android:id="@+id/topBar"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#BFFFFFFF">
+
+		<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="10dp"
+				android:layout_marginEnd="238dp"
+				android:layoutDirection="rtl"
+				tools:ignore="RelativeOverlap">
+
+			<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/score"
+					android:textColor="@color/black"
+					android:textSize="20sp"
+					android:textStyle="bold" />
+
+			<TextView
+					android:id="@+id/points"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/_0"
+					android:textColor="@color/black"
+					android:textSize="20sp"
+					android:textStyle="bold" />
+
+		</LinearLayout>
+
+		<LinearLayout
+				android:id="@+id/hearts"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentEnd="true"
+				android:layout_marginTop="5dp"
+				android:layout_marginEnd="10dp"
+				android:layoutDirection="rtl">
+
+			<ImageView
+					android:id="@+id/heart1"
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_marginStart="5dp"
+					android:contentDescription="@string/heart"
+					android:src="@drawable/big_heart" />
+
+			<ImageView
+					android:id="@+id/heart2"
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_marginStart="5dp"
+					android:contentDescription="@string/heart"
+					android:src="@drawable/big_heart" />
+
+			<ImageView
+					android:id="@+id/heart3"
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_marginStart="5dp"
+					android:contentDescription="@string/heart"
+					android:src="@drawable/big_heart" />
+
+		</LinearLayout>
+
+	</RelativeLayout>
+
+	<RelativeLayout
+			android:id="@+id/rowsLayout"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent" />
+
+	<ImageView
+			android:id="@+id/border"
+			android:layout_width="match_parent"
+			android:layout_height="8dp"
+			android:layout_alignParentBottom="true"
+			android:layout_marginBottom="155dp"
+			android:contentDescription="@string/rope"
+			android:elevation="7dp"
+			android:scaleType="fitXY"
+			android:src="@drawable/rope" />
+
+	<RelativeLayout
+			android:id="@+id/bottomBar"
+			android:layout_width="match_parent"
+			android:layout_height="105dp"
+			android:layout_alignParentEnd="true"
+			android:layout_alignParentBottom="true">
+
+
+		<ImageView
+				android:layout_width="match_parent"
+				android:layout_height="105dp"
+				android:contentDescription="@string/passed_through"
+				android:src="@drawable/board" />
+
+		<TextView
+				android:id="@+id/authorizedSmileys"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_centerInParent="true"
+				android:onClick="onClick"
+				android:text="@string/_0"
+				android:textColor="@color/black"
+				android:textSize="30sp"
+				android:textStyle="bold" />
+
+	</RelativeLayout>
+
+</RelativeLayout>

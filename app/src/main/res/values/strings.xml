@@ -1,0 +1,9 @@
+<resources>
+	<string name="app_name">FallBall</string>
+	<string name="got_it">Got it!</string>
+	<string name="score">ניקוד:</string>
+	<string name="_0">0</string>
+	<string name="rope">rope</string>
+	<string name="heart">heart</string>
+	<string name="passed_through">passed through</string>
+</resources>
