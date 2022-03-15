@@ -29,7 +29,7 @@ public class Button extends androidx.appcompat.widget.AppCompatTextView {
 		TypedArray arr = context.obtainStyledAttributes(attributeSet, changedAttributes);
 
 		int defaultPadding = arr.hasValue(0) ?
-			arr.getDimensionPixelOffset(0, -1) : (int) Utils.convertDpToPixel(context, 15);
+			arr.getDimensionPixelOffset(0, -1) : (int) Utils.dpToPixels(context, 15);
 		int[] padding = {
 			arr.hasValue(1) ?
 				arr.getDimensionPixelOffset(1, -1) : defaultPadding,

@@ -8,6 +8,12 @@
 		tools:context=".MainActivity">
 
 	<RelativeLayout
+			android:id="@+id/rowsLayout"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:gravity="center_horizontal" />
+
+	<RelativeLayout
 			android:id="@+id/topBar"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -76,11 +82,6 @@
 		</LinearLayout>
 
 	</RelativeLayout>
-
-	<RelativeLayout
-			android:id="@+id/rowsLayout"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent" />
 
 	<ImageView
 			android:id="@+id/border"

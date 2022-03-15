@@ -23,8 +23,8 @@ public class Smiley extends androidx.appcompat.widget.AppCompatImageView {
 
 		setLayoutParams(
 			new ViewGroup.LayoutParams(
-				(int) Utils.convertDpToPixel(context, 40),
-				(int) Utils.convertDpToPixel(context, 40)
+				(int) Utils.dpToPixels(context, 40),
+				(int) Utils.dpToPixels(context, 40)
 			)
 		);
 
@@ -47,6 +47,14 @@ public class Smiley extends androidx.appcompat.widget.AppCompatImageView {
 			setBackground(ContextCompat.getDrawable(getContext(), backgroundId));
 		else setBackgroundResource(0);
 		setImageDrawable(ContextCompat.getDrawable(getContext(), getDrawableIdByFace(type)));
+	}
+
+	public void changeToHappy() {
+		setType(Face.HAPPY);
+	}
+
+	public void changeToSad() {
+		setType(Face.SAD);
 	}
 
 	public int getDrawableIdByFace(Face face) {

@@ -9,7 +9,7 @@ import com.example.fallball.ui.TextDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-	GameThread gameThread = new GameThread(this);
+	GameThread gameThread;
 
 	boolean paused = false;
 
@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		gameThread.setRelativeLayout(findViewById(R.id.rowsLayout));
+		gameThread = new GameThread(this);
 		gameThread.start();
 	}
 

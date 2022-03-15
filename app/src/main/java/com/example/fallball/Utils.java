@@ -6,8 +6,12 @@ import android.util.DisplayMetrics;
 
 public class Utils {
 
-	public static float convertDpToPixel(Context context, float dp) {
+	public static float dpToPixels(Context context, float dp) {
 		return dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+	}
+
+	public static float pixelsToDp(Context context, float pixels) {
+		return pixels / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
 	}
 
 	public static int getScreenWidth() {
