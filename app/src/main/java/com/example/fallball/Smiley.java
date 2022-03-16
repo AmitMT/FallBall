@@ -35,29 +35,7 @@ public class Smiley extends androidx.appcompat.widget.AppCompatImageView {
 		this(context, Face.HAPPY, new SmileyRow(context), 0);
 	}
 
-	void smileyClicked() {
-		if (type == Face.REGULAR) setType(Face.SHOCK);
-		smileyRow.removeSmiley(indexInRow);
-	}
-
-	public void setType(Face type) {
-		this.type = type;
-		int backgroundId = getBackgroundIdByFace(type);
-		if (backgroundId != 0)
-			setBackground(ContextCompat.getDrawable(getContext(), backgroundId));
-		else setBackgroundResource(0);
-		setImageDrawable(ContextCompat.getDrawable(getContext(), getDrawableIdByFace(type)));
-	}
-
-	public void changeToHappy() {
-		setType(Face.HAPPY);
-	}
-
-	public void changeToSad() {
-		setType(Face.SAD);
-	}
-
-	public int getDrawableIdByFace(Face face) {
+	public static int getDrawableIdByFace(Face face) {
 		switch (face) {
 			case REGULAR:
 				return R.drawable.regular_face;
@@ -94,7 +72,7 @@ public class Smiley extends androidx.appcompat.widget.AppCompatImageView {
 		}
 	}
 
-	public int getBackgroundIdByFace(Face face) {
+	public static int getBackgroundIdByFace(Face face) {
 		switch (face) {
 			case SICK:
 				return R.drawable.red_face;
@@ -108,6 +86,53 @@ public class Smiley extends androidx.appcompat.widget.AppCompatImageView {
 			default:
 				return R.drawable.yellow_face;
 		}
+	}
+
+	void smileyClicked() {
+		switch (type) {
+			case REGULAR:
+				setType(Face.SHOCK);
+				smileyRow.removeSmiley(indexInRow, 300);
+				break;
+			case SICK:
+				((MainActivity) getContext()).getGameThread().decreaseHealth();
+				smileyRow.removeSmiley(indexInRow);
+				break;
+			case ROW_BOMB:
+				smileyRow.removeAllSmileys();
+				break;
+			case EMPTY:
+				for (SmileyRow smileyRow : ((MainActivity) getContext()).getGameThread().smileyRows)
+					smileyRow.removeAllSmileys();
+				break;
+			default:
+				smileyRow.removeSmiley(indexInRow);
+		}
+	}
+
+	public void setType(Face type) {
+		this.type = type;
+		int backgroundId = getBackgroundIdByFace(type);
+		if (backgroundId != 0)
+			setBackground(ContextCompat.getDrawable(getContext(), backgroundId));
+		else setBackgroundResource(0);
+		setImageDrawable(ContextCompat.getDrawable(getContext(), getDrawableIdByFace(type)));
+	}
+
+	public void changeToHappy() {
+		if (Smiley.getBackgroundIdByFace(type) == R.drawable.yellow_face)
+			setType(Face.HAPPY);
+	}
+
+	public void changeToSad() {
+		if (Smiley.getBackgroundIdByFace(type) == R.drawable.yellow_face)
+			setType(Face.SAD);
+	}
+
+	@NonNull
+	@Override
+	public String toString() {
+		return type.toString();
 	}
 
 	public enum Face {

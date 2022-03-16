@@ -17,7 +17,6 @@ public class GameThread extends Thread {
 
 	final int SPAWN_INTERVAL = 2000;
 	final int CHECK_INTERVAL = 50;
-
 	Activity activity;
 	RelativeLayout relativeLayout;
 	RelativeLayout bottomBar;
@@ -29,14 +28,11 @@ public class GameThread extends Thread {
 	SmileyRow smileyRow;
 	ArrayList<SmileyRow> smileyRows = new ArrayList<>();
 	Boolean createMoreRows = false;
-
+	Boolean isChecking = false;
 	int timesToChangeNumber = 3;
 	int currentAuthorizedNumber;
-
 	int score = 0;
-
 	int lives = 3;
-
 
 	public GameThread(Activity activity) {
 		this.activity = activity;
@@ -69,10 +65,17 @@ public class GameThread extends Thread {
 	public void run() {
 		startHeartBeat();
 
+		try {
+			sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		createMoreRows = true;
+		isChecking = true;
 
 		for (int i = SPAWN_INTERVAL / CHECK_INTERVAL; true; i++) {
-			if (createMoreRows) handler.post(this::checkRowPass);
+			if (isChecking) handler.post(this::checkRowPass);
 
 			if (i == SPAWN_INTERVAL / CHECK_INTERVAL && createMoreRows) {
 				i = -1;
@@ -97,6 +100,7 @@ public class GameThread extends Thread {
 			smileyRow.pauseAnimation();
 
 		createMoreRows = false;
+		isChecking = false;
 	}
 
 	public void resumeGame() {
@@ -104,43 +108,48 @@ public class GameThread extends Thread {
 			smileyRow.resumeAnimation();
 
 		createMoreRows = true;
+		isChecking = true;
 	}
 
 	void checkRowPass() {
-		if (smileyRows.size() > 0 && smileyRows.get(0).getY() >= borderView.getY() && smileyRows.size() != 1) {
-			if (smileyRows.get(0).getSmileysNumber() == 0) {
+		if (smileyRows.size() > 0 && smileyRows.get(0).getY() >= borderView.getY()) {
+			if (!smileyRows.get(0).hasSmileys()) {
 				smileyRows.remove(0);
 				checkRowPass(); // ריקורסיה 😍
 				return;
 			}
 			timesToChangeNumber = 3;
-			authorizedCountView.setText(String.valueOf(getNewRandomNumber()));
 			if (smileyRows.get(0).checkSmileyNumber(currentAuthorizedNumber)) {
 				score += smileyRows.get(0).getSmileysNumber();
 				scoreView.setText(String.valueOf(score));
-			} else {
-				if (lives > 0) {
-					hearts[lives - 1].setImageResource(0);
-					startHeartExplosion(hearts[lives - 1]);
-					hearts[lives - 1] = null;
-					lives--;
-				}
-				if (lives == 0) {
-					pauseGame();
+			} else decreaseHealth();
+			currentAuthorizedNumber = getNewRandomNumber();
+			authorizedCountView.setText(String.valueOf(currentAuthorizedNumber));
 
-					TextDialog.Options textDialogOptions = new TextDialog.Options()
-						.setTitle("You lost!")
-						.setText("Start a new game?")
-						.setButtonText("LETS DO IT!");
-					TextDialog textDialog = new TextDialog(activity, textDialogOptions);
-					textDialog.show();
-					textDialog.setOnCancelListener((dialogInterface) -> {
-						Intent intent = new Intent(activity, MainActivity.class);
-						activity.startActivity(intent);
-					});
-				}
-			}
 			smileyRows.remove(0);
+		}
+	}
+
+	void decreaseHealth() {
+		if (lives > 0) {
+			hearts[lives - 1].setImageResource(0);
+			startHeartExplosion(hearts[lives - 1]);
+			hearts[lives - 1] = null;
+			lives--;
+		}
+		if (lives == 0) {
+			pauseGame();
+
+			TextDialog.Options textDialogOptions = new TextDialog.Options()
+				.setTitle("You lost!")
+				.setText("Start a new game?")
+				.setButtonText("LETS DO IT!");
+			TextDialog textDialog = new TextDialog(activity, textDialogOptions);
+			textDialog.show();
+			textDialog.setOnCancelListener((dialogInterface) -> {
+				Intent intent = new Intent(activity, MainActivity.class);
+				activity.startActivity(intent);
+			});
 		}
 	}
 
