@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -14,7 +13,7 @@ import androidx.core.content.ContextCompat;
 
 public class CitizensStatusService extends Service {
 
-	int maxTime = 20;
+	int maxTime = 10;
 	int currentTime = maxTime;
 	NotificationCompat.Builder statusBarNotification;
 	Thread statusBarUpdateThread;
@@ -42,25 +41,43 @@ public class CitizensStatusService extends Service {
 
 			@Override
 			public void run() {
-				for (; true; currentTime = (isPlayed) ? currentTime - 1 : currentTime + 1) {
+				for (; threadActive; currentTime = (isPlayed) ? currentTime - 1 : currentTime + 1) {
 					if (currentTime >= maxTime) {
 						currentTime = maxTime;
 						statusBarNotification.setContentText("Energy Full");
+						statusBarNotification.setProgress(0, 0, false);
+
+						startForeground(2, statusBarNotification.build());
+						if (!isPlayed && currentTime >= maxTime) {
+							NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+							notificationManager.cancel(notificationId);
+							notificationManager.notify(2, statusBarNotification.build());
+							stopStatusBarNotificationUpdateThread();
+							stopSelf();
+						}
 					} else if (currentTime <= 0) {
 						currentTime = 0;
 						statusBarNotification.setContentText("Energy Depleted");
-					} else
-						statusBarNotification.setContentText("Energy status");
+						GameThread.gameDone = true;
+						currentTime = maxTime;
+						statusBarNotification.setProgress(0, 0, false);
 
-					statusBarNotification.setProgress(maxTime, currentTime, false);
-					startForeground(notificationId, statusBarNotification.build());
+						NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+						notificationManager.cancel(notificationId);
+						notificationManager.notify(2, statusBarNotification.build());
+						stopStatusBarNotificationUpdateThread();
+						stopSelf();
+					} else {
+						statusBarNotification.setContentText("Energy status");
+						statusBarNotification.setProgress(maxTime, currentTime, false);
+						startForeground(notificationId, statusBarNotification.build());
+					}
 
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-
 				}
 			}
 		};
@@ -70,8 +87,6 @@ public class CitizensStatusService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
-
 		isPlayed = intent.getBooleanExtra("isPlayed", false);
 
 		return START_REDELIVER_INTENT;
@@ -84,13 +99,6 @@ public class CitizensStatusService extends Service {
 
 	void stopStatusBarNotificationUpdateThread() {
 		threadActive = false;
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-
-		Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
 	}
 
 	void createNotificationChannel() {

@@ -18,9 +18,10 @@ import java.util.Random;
 
 public class GameThread extends Thread {
 
+	public static boolean gameDone;
+
 	final int SPAWN_INTERVAL = 2000;
 	final int CHECK_INTERVAL = 50;
-
 	Activity activity;
 	RelativeLayout relativeLayout;
 	RelativeLayout bottomBar;
@@ -28,17 +29,14 @@ public class GameThread extends Thread {
 	ImageView borderView;
 	TextView scoreView;
 	ImageView[] hearts;
-
 	Handler handler;
 	SmileyRow smileyRow;
 	ArrayList<SmileyRow> smileyRows = new ArrayList<>();
 	boolean gameIsBeingPlayed = true;
 	Boolean createMoreRows = false;
 	Boolean isChecking = false;
-
 	int timesToChangeNumber = 3;
 	int currentAuthorizedNumber;
-
 	int score = 0;
 	int lives = 3;
 
@@ -69,7 +67,7 @@ public class GameThread extends Thread {
 		});
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-			sendServiceIntent(true);
+			startServiceIntent(true);
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public class GameThread extends Thread {
 		gameIsBeingPlayed = false;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-			sendServiceIntent(false);
+			startServiceIntent(false);
 	}
 
 	public void resumeGame() {
@@ -128,10 +126,15 @@ public class GameThread extends Thread {
 		gameIsBeingPlayed = true;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-			sendServiceIntent(true);
+			startServiceIntent(true);
 	}
 
 	void checkRowPass() {
+		if (gameDone) {
+			endGame();
+			gameDone = false;
+		}
+
 		if (smileyRows.size() > 0 && smileyRows.get(0).getY() >= borderView.getY()) {
 			if (!smileyRows.get(0).hasSmileys()) {
 				smileyRows.remove(0);
@@ -157,20 +160,28 @@ public class GameThread extends Thread {
 			hearts[lives - 1] = null;
 			lives--;
 		}
-		if (lives == 0) {
-			pauseGame();
 
-			TextDialog.Options textDialogOptions = new TextDialog.Options()
-				.setTitle("You Ran Out of Lives!")
-				.setText("Start a new game?")
-				.setButtonText("LETS DO IT!");
-			TextDialog textDialog = new TextDialog(activity, textDialogOptions);
-			textDialog.show();
-			textDialog.setOnCancelListener((dialogInterface) -> {
-				Intent intent = new Intent(activity, MainActivity.class);
-				activity.startActivity(intent);
-			});
-		}
+		if (lives == 0)
+			endGame();
+	}
+
+	public void endGame() {
+		pauseGame();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			startServiceIntent(false);
+
+
+		TextDialog.Options textDialogOptions = new TextDialog.Options()
+			.setTitle("You Ran Out of Lives!")
+			.setText("Start a new game?")
+			.setButtonText("LETS DO IT!");
+		TextDialog textDialog = new TextDialog(activity, textDialogOptions);
+		textDialog.show();
+		textDialog.setOnCancelListener((dialogInterface) -> {
+			Intent intent = new Intent(activity, MainActivity.class);
+			activity.startActivity(intent);
+		});
 	}
 
 	void startHeartExplosion(ImageView heart) {
@@ -193,7 +204,7 @@ public class GameThread extends Thread {
 	}
 
 	@RequiresApi(api = Build.VERSION_CODES.O)
-	void sendServiceIntent(Boolean isPlayed) {
+	void startServiceIntent(Boolean isPlayed) {
 		Intent serviceIntent = new Intent(activity, CitizensStatusService.class);
 		serviceIntent.putExtra("isPlayed", isPlayed);
 		activity.startForegroundService(serviceIntent);
