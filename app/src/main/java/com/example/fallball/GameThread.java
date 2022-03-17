@@ -3,10 +3,13 @@ package com.example.fallball;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
 
 import com.example.fallball.ui.TextDialog;
 
@@ -17,6 +20,7 @@ public class GameThread extends Thread {
 
 	final int SPAWN_INTERVAL = 2000;
 	final int CHECK_INTERVAL = 50;
+
 	Activity activity;
 	RelativeLayout relativeLayout;
 	RelativeLayout bottomBar;
@@ -24,13 +28,17 @@ public class GameThread extends Thread {
 	ImageView borderView;
 	TextView scoreView;
 	ImageView[] hearts;
+
 	Handler handler;
 	SmileyRow smileyRow;
 	ArrayList<SmileyRow> smileyRows = new ArrayList<>();
+	boolean gameIsBeingPlayed = true;
 	Boolean createMoreRows = false;
 	Boolean isChecking = false;
+
 	int timesToChangeNumber = 3;
 	int currentAuthorizedNumber;
+
 	int score = 0;
 	int lives = 3;
 
@@ -59,6 +67,9 @@ public class GameThread extends Thread {
 				authorizedCountView.setText(String.valueOf(currentAuthorizedNumber));
 			}
 		});
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			sendServiceIntent(true);
 	}
 
 	@Override
@@ -101,21 +112,30 @@ public class GameThread extends Thread {
 
 		createMoreRows = false;
 		isChecking = false;
+		gameIsBeingPlayed = false;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			sendServiceIntent(false);
 	}
 
 	public void resumeGame() {
 		for (SmileyRow smileyRow : smileyRows)
 			smileyRow.resumeAnimation();
 
+
 		createMoreRows = true;
 		isChecking = true;
+		gameIsBeingPlayed = true;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+			sendServiceIntent(true);
 	}
 
 	void checkRowPass() {
 		if (smileyRows.size() > 0 && smileyRows.get(0).getY() >= borderView.getY()) {
 			if (!smileyRows.get(0).hasSmileys()) {
 				smileyRows.remove(0);
-				checkRowPass(); // ריקורסיה 😍
+				if (smileyRows.size() > 1) checkRowPass(); // ריקורסיה 😍
 				return;
 			}
 			timesToChangeNumber = 3;
@@ -141,7 +161,7 @@ public class GameThread extends Thread {
 			pauseGame();
 
 			TextDialog.Options textDialogOptions = new TextDialog.Options()
-				.setTitle("You lost!")
+				.setTitle("You Ran Out of Lives!")
 				.setText("Start a new game?")
 				.setButtonText("LETS DO IT!");
 			TextDialog textDialog = new TextDialog(activity, textDialogOptions);
@@ -170,5 +190,12 @@ public class GameThread extends Thread {
 
 	public int getNewRandomNumber() {
 		return new Random().nextInt(8) + 1;
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.O)
+	void sendServiceIntent(Boolean isPlayed) {
+		Intent serviceIntent = new Intent(activity, CitizensStatusService.class);
+		serviceIntent.putExtra("isPlayed", isPlayed);
+		activity.startForegroundService(serviceIntent);
 	}
 }
